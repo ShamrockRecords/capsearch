@@ -7,6 +7,13 @@ const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
 router.get('/', wrap(async function(req, res, next) {
 
+	let result = await firebaseSession.enter(req, res) ;
+
+    if (result == 0) {
+        res.redirect('/admin');
+        return ;
+    }
+
     var config = {
 		apiKey: process.env.OPENED_FIREBASE_API_KEY,
 		authDomain: process.env.FIREBASE_AUTH_DOMAIN,
