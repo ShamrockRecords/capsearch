@@ -9,4 +9,8 @@ router.get('/', wrap(async function(req, res, next) {
     res.render('index', {});		 
 })) ;
 
+router.get('/:name', wrap(async function(req, res, next) {
+    res.render('main', {name: req.params.name});		 
+})) ;
+
 module.exports = router;
