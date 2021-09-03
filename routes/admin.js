@@ -34,10 +34,11 @@ router.get('/', wrap(async function(req, res, next) {
     if (userProfile == null) {
         userProfile = {} ;
 
-        userProfile["name"] = "" ;
+        userProfile["name"] = user.displayName ;
         userProfile["organization"] = "" ;
         userProfile["tag"] = "" ;
         userProfile["role"] = "0" ;
+        userProfile["uid"] = user.uid ;
 
         clientData.setUserProfile(user.uid, userProfile) ;
     }

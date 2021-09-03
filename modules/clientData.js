@@ -14,6 +14,20 @@ class clientData {
 		return userProfile ;
 	}
 
+	async getUserProfileFromTag(tag) {
+		let userProfile = null ;
+
+        {
+            let snapshot = await admin.firestore().collection("users").where("tag", "==", tag).get() ;
+		
+			for (let key in snapshot.docs) {
+				userProfile = snapshot.docs[key].data() ;
+			}
+        }
+
+		return userProfile ;
+	}
+
 	async setUserProfile(uid, data) {
 		await admin.firestore().collection("users").doc(uid).set(data) ;
 	}
