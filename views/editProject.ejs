@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<%- include('parts/head', {title: '動画を追加'}) %>
+	</head>
+	<body>
+		<div class="container p-5">
+
+			<h1>動画を追加</h1>
+
+			<form class="mb-3" method="POST" action="/admin/edit">
+				<div class="col-sm mb-3">					
+					<div class="input-group mb-3">
+						<input required id="videoURL" type="text" class="form-control" value="<%= project.videoURL %>" placeholder="YouTube動画のURL" aria-label="YouTube動画のURL">
+						<button class="btn btn-outline-secondary" type="button" id="videoLoadButton">読み込み</button>
+					</div>
+				</div>
+				<div class="col-sm mb-3">
+					<label for="name" class="form-label">タイトル</label>
+					<input required type="text" class="form-control" id="videoTitle" name="videoTitle" value="<%= project.videoTitle %>">
+				</div>
+
+				<input type="hidden" id="videoId" name="videoId" value="">
+
+				<div class="col-sm mb-3">					
+					<button class="btn btn-outline-secondary" type="submit">追加</button>
+				</div>
+			</form>
+
+			<div class="mb-3" id="videoPreview"></div>
+		</div>
+
+		<script>
+			let ytPlayer = null ;
+
+			$(function () {
+				var tag = document.createElement('script');
+				tag.src = "https://www.youtube.com/iframe_api";
+				var firstScriptTag = document.getElementsByTagName('script')[0];
+				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+				$("#videoLoadButton").on("click", (e) => {
+					let videoURL = $("#videoURL").val() ;
+
+					if (videoURL == "") {
+						alert("YouTube動画のURLを入力してください。") ;
+						return ;
+					}
+					
+					let videoId = getVideoIdFromYouTubeURL(videoURL) ;
+
+					if (videoId == "") {
+						alert("YouTube動画のURLではありません。") ;
+						return ;
+					}
+
+					if (ytPlayer != null) {
+						ytPlayer.destroy() ;
+					}
+
+					ytPlayer = new YT.Player(
+						"videoPreview",
+							{
+							width: 300,
+							height: 300,
+							videoId: videoId,
+							
+							events: {
+								'onReady': onPlayerReady,
+								'onError': onPlayerError
+							}
+						}
+					);
+				}) ;
+			}) ;
+
+			function onPlayerReady(event) {				
+				$("#videoTitle").val(ytPlayer.getVideoData().title) ;
+				$("#videoId").val(ytPlayer.getVideoData().video_id) ;
+				console.log(ytPlayer.getVideoData()) ;
+			}
+
+			function onPlayerError(event) {
+
+			}
+
+			function getVideoIdFromYouTubeURL(url) {
+				var parser = new URL(url) ;
+
+				if (parser.hostname == "youtu.be") {
+					return parser.pathname ;
+				} else {
+					if (parser.searchParams.has("v")) {
+						return parser.searchParams.get("v") ;
+					}
+				}
+
+				return "" ;
+			}
+		</script>
+	</body>
+</html>

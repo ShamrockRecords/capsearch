@@ -31,6 +31,10 @@ class clientData {
 	async setUserProfile(uid, data) {
 		await admin.firestore().collection("users").doc(uid).set(data) ;
 	}
+
+	async addProject(project) {
+		await admin.firestore().collection("projects").doc(project.projectId).set(project) ;
+	}
 }
 
 module.exports =  new clientData;

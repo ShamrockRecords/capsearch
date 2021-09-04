@@ -3,6 +3,7 @@ let firebaseSession = require('../modules/firebase_session.js') ;
 let admin = require('firebase-admin');
 let clientData = require('../modules/clientData.js');
 var router = express.Router() ;
+const uuid = require('node-uuid');
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
@@ -48,6 +49,36 @@ router.get('/', wrap(async function(req, res, next) {
     } else {
         res.render('admin', {user: user});	
     }	      
+})) ;
+
+router.get('/edit', wrap(async function(req, res, next) {
+    let result = await firebaseSession.enter(req, res) ;
+
+    if (result != 0) {
+        res.redirect('/signin');
+        return ;
+    }
+
+    let project = {} ;
+
+    res.render('editProject', {project: project});	
+})) ;
+
+router.post('/edit', wrap(async function(req, res, next) {
+
+    let currentUser = req.session.user ;
+    let project = {} ;
+
+    let projectId = uuid.v4().replace(/-/g, '') ;
+
+    project.videoTitle = req.body.videoTitle ;
+    project.videoId = req.body.videoTitle ;
+    project.uid = currentUser.uid ;
+    project.projectId = projectId ;
+
+    await clientData.addProject(project) ;
+
+    res.redirect('/admin');
 })) ;
 
 router.get('/signout', wrap(async function(req, res, next) {

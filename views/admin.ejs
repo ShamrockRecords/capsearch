@@ -4,18 +4,30 @@
 		<%- include('parts/head', {title: '字幕データから動画を検索'}) %>
 	</head>
 	<body>
-		<div class="container p-2">
+		<div class="container p-5">
 
 			<h1>字幕データから動画を検索</h1>
 
-			<div class="row">
+			<div class="row mb-3">
 				<div class="col">
 					<h2>ようこそ <%= user.displayName %> さん</h2>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row mb-3">
 				<div class="col">
-					<a href="/admin/signout">Sign Out</a>
+					<button type="button" class="btn btn-primary" onclick="location.href='/admin/edit';">動画を追加</button>					
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col">
+					<div class="mb-3" id="projects"></div>
+				</div>
+			</div>
+			
+			<div class="row mb-3">
+				<div class="col">
+					<button type="button" class="btn btn-danger" onclick="location.href='/admin/signout';">サインアウト</button>
 				</div>
 			</div>
 		</div>
