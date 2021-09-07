@@ -24,12 +24,80 @@
 					<div class="mb-3" id="projects"></div>
 				</div>
 			</div>
-			
+
+			<div class="row mb-3">
+				<div class="col">
+					<div class="mb-3" id="pagenation"></div>
+				</div>
+			</div>
+		
 			<div class="row mb-3">
 				<div class="col">
 					<button type="button" class="btn btn-danger" onclick="location.href='/admin/signout';">サインアウト</button>
 				</div>
 			</div>
 		</div>
+		<script>
+			$(function () {
+				reloadRequest(0) ;
+			}) ;
+
+			async function reloadRequest(page) {
+				
+				let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border my-3" role="status"><span class="visually-hidden">Loading...</span></div></div>' ;
+				
+				$("#projects").empty() ;
+				$("#projects").append(spinner) ;
+				$("#pagenation").empty() ;
+				
+				let data = await fetch("/admin/data?page=" + page).then(response => response.json()) ;
+				
+				$("#projects").empty() ;
+				$("#pagenation").empty() ;
+				
+
+				for (let key in data.projects) {
+					let project = data.projects[key] ;
+
+					$("#projects").append(projectBlock(project)) ;
+				}
+
+				let ul = $('<ul class="pagination">') ;
+
+				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(0);">最初</a></li>') ;
+
+				for (let i=0; i<data.pageCount; i++) {
+					if (i == data.page) {
+						ul.append('<li class="page-item active"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+					} else {
+						ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+					}
+				}
+
+				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + (data.pageCount - 1) + ');">最後</a></li>') ;
+
+				$("#pagenation").append('<nav aria-label="Page navigation example">')
+					.append('<ul class="pagination">').append(ul) ;
+			}
+
+			function projectBlock(project) {
+
+				return `<div class="card my-3">
+							<div class="card-body">
+								<div class="row">
+									<div class="col">
+										<div class="row">
+											<div class="col-sm">
+												<a href="/admin/project?projectId=${project.projectId}">${project.
+videoTitle}</a>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+							</div>
+						</div>` ;
+			}
+		</script>
 	</body>
 </html>

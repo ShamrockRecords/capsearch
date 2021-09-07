@@ -51,6 +51,37 @@ router.get('/', wrap(async function(req, res, next) {
     }	      
 })) ;
 
+router.get('/data', wrap(async function(req, res, next) {
+    let projects = await clientData.getAllProjects() ;
+
+    let fillteredprojects = [] ;
+
+	let pageCount = Math.floor((projects.length != 0 ? projects.length - 1 : 0) / 5) + 1 ;
+	let page = req.query.page != undefined ? req.query.page : 0;
+	let startIndex = page * 5 ;
+	let count = 5 ;
+
+	for (let i = startIndex; i < projects.length; i++) {
+		let project = projects[i] ;
+
+		fillteredprojects.push(project) ;
+
+		count-- ;
+
+		if (count == 0) {
+			break ;
+		}
+	}
+
+    let data = {
+        projects: fillteredprojects,
+        pageCount: pageCount,
+        page: page} ;
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
+})) ;
+
 router.get('/edit', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
@@ -71,14 +102,23 @@ router.post('/edit', wrap(async function(req, res, next) {
 
     let projectId = uuid.v4().replace(/-/g, '') ;
 
+    project.date = new Date() ;
     project.videoTitle = req.body.videoTitle ;
-    project.videoId = req.body.videoTitle ;
+    project.videoId = req.body.videoId ;
     project.uid = currentUser.uid ;
     project.projectId = projectId ;
 
-    await clientData.addProject(project) ;
+    if (await clientData.isExistingVideoId(project.videoId)) {
+        res.render('editProject', {project: project});
+    } else {
+        await clientData.addProject(project) ;
 
-    res.redirect('/admin');
+        res.redirect('/admin');
+    }
+})) ;
+
+router.get('/project', wrap(async function(req, res, next) {
+    res.render('project', {});	
 })) ;
 
 router.get('/signout', wrap(async function(req, res, next) {
