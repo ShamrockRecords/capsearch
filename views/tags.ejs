@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<%- include('parts/head', {title: 'タグ一覧'}) %>
+	</head>
+	<body>
+		<div class="container p-2">
+			<%- include('parts/nav') %>
+		</div>
+
+		<div class="container p-5">
+
+			<h1>タグ一覧</h1>
+
+			<% for (let key in tags) { %>
+				<div class="card my-3">
+					<div class="card-body">
+						<div class="row">
+							<div class="col">
+								<div class="row">
+									<div class="col-sm">
+										<a href="/admin/tags/edit?tagId=<%= tags[key].tagId %>"><%= tags[key].displayName %></a>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm">
+										<%= tags[key].name %>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm">
+										<%= tags[key].description %>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			<% } %>
+		</div>
+	</body>
+</html>

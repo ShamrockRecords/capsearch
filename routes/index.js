@@ -16,12 +16,12 @@ router.get('/search', wrap(async function(req, res, next) {
 
 router.get('/search/:name', wrap(async function(req, res, next) {
 
-	let userProfile = await clientData.getUserProfileFromTag(req.params.name) ;
+	let tag = await clientData.getTag(req.params.name) ;
 
-	if (userProfile == null) {
+	if (tag == null) {
 		res.redirect('/search') ;
 	} else {
-    	res.render('main', {userProfile: userProfile});
+    	res.render('main', {tag: tag});
 	}
 })) ;
 

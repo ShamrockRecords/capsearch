@@ -22,37 +22,47 @@ router.get('/', wrap(async function(req, res, next) {
 
     let currentUser = req.session.user ;
 
-    let user ;
-
-    try {
-        user = await admin.auth().getUser(currentUser.uid) ;
-    } catch (error) {
-        
-    }
-
-    let userProfile = await clientData.getUserProfile(user.uid) ;
+    let userProfile = await clientData.getUserProfile(currentUser.uid) ;
 
     if (userProfile == null) {
+        let user ;
+
+        try {
+            user = await admin.auth().getUser(currentUser.uid) ;
+        } catch (error) {
+            
+        }
+
         userProfile = {} ;
 
         userProfile["name"] = user.displayName ;
         userProfile["organization"] = "" ;
-        userProfile["tag"] = "" ;
         userProfile["role"] = "0" ;
         userProfile["uid"] = user.uid ;
 
-        clientData.setUserProfile(user.uid, userProfile) ;
+        clientData.setUserProfile(currentUser.uid, userProfile) ;
     }
 
+    let tags = await clientData.getOwnedTags(currentUser.uid) ;
+
     if (userProfile.role == "0") {
-        res.render('require', {user: user});	
+        res.render('require', {userProfile: userProfile});	
     } else {
-        res.render('admin', {user: user});	
+        res.render('admin', {
+            userProfile: userProfile,
+            tags: tags
+        });	
     }	      
 })) ;
 
 router.get('/data', wrap(async function(req, res, next) {
-    let projects = await clientData.getAllProjects() ;
+    let tagId = req.query.tagId ;
+
+    if (tagId == undefined) {
+        tagId = "" ;
+    }
+
+    let projects = await clientData.getProjects(tagId) ;
 
     let fillteredprojects = [] ;
 
@@ -82,6 +92,13 @@ router.get('/data', wrap(async function(req, res, next) {
     res.end(JSON.stringify(data));
 })) ;
 
+router.get('/delete', wrap(async function(req, res, next) {
+    await clientData.deleteProject(req.query.projectId) ;       
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({}));
+})) ;
+
 router.get('/edit', wrap(async function(req, res, next) {
     let result = await firebaseSession.enter(req, res) ;
 
@@ -90,35 +107,52 @@ router.get('/edit', wrap(async function(req, res, next) {
         return ;
     }
 
+    let currentUser = req.session.user ;
     let project = {} ;
 
-    res.render('editProject', {project: project});	
+    if (req.query.projectId != undefined) {
+        project = await clientData.getProject(req.query.projectId) ;
+    }
+
+    let tags = await clientData.getOwnedTags(currentUser.uid) ;
+
+    res.render('editProject', {
+        project: project,
+        tags: tags
+    });	
 })) ;
 
 router.post('/edit', wrap(async function(req, res, next) {
 
     let currentUser = req.session.user ;
     let project = {} ;
+    let projectId = "" ;
 
-    let projectId = uuid.v4().replace(/-/g, '') ;
+    if (req.body.projectId != "") {
+        projectId = req.body.projectId ;
+    } else {
+        projectId = uuid.v4().replace(/-/g, '') ;
+    }
 
     project.date = new Date() ;
     project.videoTitle = req.body.videoTitle ;
+    project.videoURL = req.body.videoURL ;
     project.videoId = req.body.videoId ;
     project.uid = currentUser.uid ;
     project.projectId = projectId ;
+    project.tagId = req.body.tagId ;
 
-    if (await clientData.isExistingVideoId(project.videoId)) {
-        res.render('editProject', {project: project});
+    if (await clientData.isExistingVideoId(project.videoId) && req.body.projectId == "") {
+        let tags = await clientData.getOwnedTags(currentUser.uid) ;
+
+        res.render('editProject', {
+            project: project,
+            tags: tags
+        });	
     } else {
-        await clientData.addProject(project) ;
-
+        await clientData.addProject(project) ;        
         res.redirect('/admin');
     }
-})) ;
-
-router.get('/project', wrap(async function(req, res, next) {
-    res.render('project', {});	
 })) ;
 
 router.get('/signout', wrap(async function(req, res, next) {

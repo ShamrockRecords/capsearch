@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<%- include('parts/head', {title: '字幕データ'}) %>
+	</head>
+	<body>
+		<div class="container p-2">
+			<%- include('parts/nav') %>
+		</div>
+
+		<div class="container p-5">
+
+			<h1>字幕データ</h1>
+
+			<div class="mb-3"><%= project.videoTitle %></div>
+
+			<form id="form">
+				<input type="hidden" name="programId" value="<%= project.projectId %>">
+				<input type="file" class="form-control" id="file" name="file" accept=".srt" onchange="changeFile(this);" aria-describedby="fileHelp">
+				<label class="form-label small">ファイルサイズは1MB以内の画像を選択してください。</label>
+			</form>
+			<div class="row mb-3">
+				<div class="col">
+					<div class="mb-3" id="spinner"></div>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col">
+					<div class="mb-3" id="subtitles"></div>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col">
+					<div class="mb-3" id="pagenation"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+
+	<script>
+		$(function () {
+			reloadRequest(0) ;
+		}) ;
+		
+		async function reloadRequest(page) {
+
+			let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border my-3" role="status"><span class="visually-hidden">Loading...</span></div></div>' ;
+			
+			$("#subtitles").empty() ;
+			$("#subtitles").append(spinner) ;
+			$("#pagenation").empty() ;
+			
+			let data = await fetch("/admin/subtitles/data?page=" + page + "&projectId=" + "<%= project.projectId %>").then(response => response.json()) ;
+			
+			$("#subtitles").empty() ;
+			$("#pagenation").empty() ;
+			
+			for (let key in data.subtitles) {
+				let subtitle = data.subtitles[key] ;
+
+				$("#subtitles").append(subtitleBlock(subtitle)) ;
+			}
+
+			let ul = $('<ul class="pagination">') ;
+
+			ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(0);">最初</a></li>') ;
+
+			for (let i=0; i<data.pageCount; i++) {
+				if (i == data.page) {
+					ul.append('<li class="page-item active"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+				} else {
+					ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+				}
+			}
+
+			ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + (data.pageCount - 1) + ');">最後</a></li>') ;
+
+			$("#pagenation").append('<nav aria-label="Page navigation example">')
+				.append('<ul class="pagination">').append(ul) ;
+		}
+
+		function subtitleBlock(subtitle) {
+
+		}
+
+		function changeFile(obj) {
+			var fileList = $('#file').get(0).files;
+
+			for (let key in fileList) {
+				let file = fileList[key] ;
+
+				if (file.size > 1024 * 1024 * 5) {
+					alert("ファイルサイズは1MB以内のものを選んでください") ;
+					return ;
+				}
+			}
+
+			const formData = new FormData($('#form').get(0));
+
+			const param = {
+				method: "POST",
+				body: formData
+			}
+
+			let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border my-3" role="status"><span class="visually-hidden">Loading...</span></div></div>' ;
+	
+			$("#spinner").empty() ;
+			$("#spinner").append(spinner) ;
+
+			fetch("/admin/subtitles/upload", param)
+				.then(response => response.json())
+				.then(data => {
+					$("#spinner").empty() ;
+
+					$("#file").val("") ;
+				});
+		}
+	</script>
+</html>

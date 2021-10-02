@@ -13,7 +13,11 @@ router.get('/', wrap(async function(req, res, next) {
         return ;
     }
 
-    res.render('temp', {});		 
+    let currentUser = req.session.user ;
+
+    let tags = await clientData.getOwnedTags(currentUser.uid) ;
+  
+    res.render('tags', {tags: tags});		 
 })) ;
 
 module.exports = router;

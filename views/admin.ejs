@@ -4,18 +4,31 @@
 		<%- include('parts/head', {title: '字幕データから動画を検索'}) %>
 	</head>
 	<body>
+		<div class="container p-2">
+			<%- include('parts/nav') %>
+		</div>
+		
 		<div class="container p-5">
-
 			<h1>字幕データから動画を検索</h1>
-
 			<div class="row mb-3">
 				<div class="col">
-					<h2>ようこそ <%= user.displayName %> さん</h2>
+					<h2>ようこそ <%= userProfile.name %> さん</h2>
 				</div>
 			</div>
+
 			<div class="row mb-3">
-				<div class="col">
-					<button type="button" class="btn btn-primary" onclick="location.href='/admin/edit';">動画を追加</button>					
+				<div class="col-sm">
+					<select class="form-select" name="tags" id="tags" aria-label="タグ一覧">
+						<% for (let key in tags) { %>
+							<option value="<%= tags[key].tagId %>"><%= tags[key].displayName %></option>
+						<% } %>
+					</select>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col col-auto">
+					<button type="button" class="btn btn-primary" onclick="location.href='/admin/edit';">動画情報を追加</button>					
 				</div>
 			</div>
 
@@ -30,27 +43,37 @@
 					<div class="mb-3" id="pagenation"></div>
 				</div>
 			</div>
-		
-			<div class="row mb-3">
-				<div class="col">
-					<button type="button" class="btn btn-danger" onclick="location.href='/admin/signout';">サインアウト</button>
-				</div>
-			</div>
 		</div>
 		<script>
 			$(function () {
+				let tagId = localStorage.getItem("tagId") ;
+
+				if (tagId != undefined) {
+					$('#tags').val(tagId) ;
+				} else {
+					localStorage.setItem("tagId", $('#tags').val()) ;
+				}
+
 				reloadRequest(0) ;
+
+				$('#tags').change(function() {
+					localStorage.setItem("tagId", $('#tags').val()) ;
+
+					reloadRequest(0) ;
+				})
 			}) ;
 
 			async function reloadRequest(page) {
 				
+				let tagId = localStorage.getItem("tagId") ;
+
 				let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border my-3" role="status"><span class="visually-hidden">Loading...</span></div></div>' ;
 				
 				$("#projects").empty() ;
 				$("#projects").append(spinner) ;
 				$("#pagenation").empty() ;
 				
-				let data = await fetch("/admin/data?page=" + page).then(response => response.json()) ;
+				let data = await fetch("/admin/data?page=" + page + "&tagId=" + tagId).then(response => response.json()) ;
 				
 				$("#projects").empty() ;
 				$("#pagenation").empty() ;
@@ -80,6 +103,13 @@
 					.append('<ul class="pagination">').append(ul) ;
 			}
 
+			async function onClickDeleteProjectButton(projectId) {
+
+				await fetch("/admin/delete?projectId=" + projectId).then(response => response.json()) ;
+
+				reloadRequest(0) ;
+			}
+
 			function projectBlock(project) {
 
 				return `<div class="card my-3">
@@ -87,9 +117,36 @@
 								<div class="row">
 									<div class="col">
 										<div class="row">
-											<div class="col-sm">
-												<a href="/admin/project?projectId=${project.projectId}">${project.
-videoTitle}</a>
+											<div class="col-sm mb-3">
+												<a href="/admin/edit?projectId=${project.projectId}">${project.videoTitle}</a>	
+											</div>
+											<div class="col-auto">
+												<button type="button" class="btn btn-primary" onclick="location.href='/admin/subtitles?projectId=${project.projectId}';">字幕データ</button>
+											</div>
+											<div class="col-auto">									
+												<!-- Button trigger modal -->
+												<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#id${project.projectId}">
+													削除
+												</button>
+
+												<!-- Modal -->
+												<div class="modal fade" id="id${project.projectId}" tabindex="-1" aria-labelledby="id${project.projectId}Label" aria-hidden="true">
+												<div class="modal-dialog">
+													<div class="modal-content">
+													<div class="modal-header">
+														<h5 class="modal-title" id="id${project.projectId}Label">Modal title</h5>
+														<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+													</div>
+													<div class="modal-body">
+														動画情報を削除します、よろしいですか？
+													</div>
+													<div class="modal-footer">
+														<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">いいえ</button>
+														<button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="onClickDeleteProjectButton('${project.projectId}')">はい</button>
+													</div>
+													</div>
+												</div>
+												</div>
 											</div>
 										</div>
 									</div>

@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
 	<head>
-		<%- include('parts/head', {title: userProfile.organization}) %>
+		<%- include('parts/head', {title: "字幕データから動画を検索"}) %>
 	</head>
 	<body>
 		<div class="container p-5">
 
-			<h1><%= userProfile.organization %> - 字幕データから動画を検索</h1>
+			<h1>字幕データから動画を検索</h1>
 			
 			<div class="row mb-3">
 				<div class="col">
-					<%= userProfile.description %>
+					<%= tag.displayName %>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col">
+					<%= tag.description %>
 				</div>
 			</div>
 			<div class="row mb-3">

@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index');
 var adminRouter = require('./routes/admin');
 var authDoneRouter = require('./routes/authDone');
 var signinRouter = require('./routes/signin');
+var tagsRouter = require('./routes/tags');
+var subtitlesRouter = require('./routes/subtitles');
 
 var app = express();
 
@@ -38,6 +40,8 @@ app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/authDone', authDoneRouter);
 app.use('/signin', signinRouter);
+app.use('/admin/tags', tagsRouter);
+app.use('/admin/subtitles', subtitlesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

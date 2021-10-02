@@ -1,17 +1,33 @@
 <!doctype html>
 <html lang="ja">
 	<head>
-		<%- include('parts/head', {title: '動画を追加'}) %>
+		<% if (project.projectId != undefined) { %>
+			<%- include('parts/head', {title: '動画情報を編集'}) %>
+		<% } else { %>
+			<%- include('parts/head', {title: '動画情報を追加'}) %>
+		<% } %>
 	</head>
 	<body>
+		<div class="container p-2">
+			<%- include('parts/nav') %>
+		</div>
+
 		<div class="container p-5">
 
-			<h1>動画を追加</h1>
+			<% if (project.projectId != undefined) { %>
+				<h1>動画情報を編集</h1>
+			<% } else { %>
+				<h1>動画情報を追加</h1>
+			<% } %>
 
 			<form class="mb-3" method="POST" action="/admin/edit">
 				<div class="col-sm mb-3">					
 					<div class="input-group mb-3">
-						<input required id="videoURL" type="text" class="form-control" value="<%= project.videoURL %>" placeholder="YouTube動画のURL" aria-label="YouTube動画のURL">
+						<% if (project.projectId != undefined) { %>
+							<input required readonly id="videoURL" name="videoURL" type="text" class="form-control" value="<%= project.videoURL %>" placeholder="YouTube動画のURL" aria-label="YouTube動画のURL">
+						<% } else { %>
+							<input required id="videoURL" name="videoURL" type="text" class="form-control" value="<%= project.videoURL %>" placeholder="YouTube動画のURL" aria-label="YouTube動画のURL">
+						<% } %>
 						<button class="btn btn-outline-secondary" type="button" id="videoLoadButton">読み込み</button>
 					</div>
 				</div>
@@ -20,13 +36,28 @@
 					<input required type="text" class="form-control" id="videoTitle" name="videoTitle" value="<%= project.videoTitle %>">
 				</div>
 
-				<input type="hidden" id="videoId" name="videoId" value="">
+				<div class="row mb-3">
+					<div class="col-sm">
+						<select class="form-select" name="tagId" id="tagId" aria-label="タグ">
+							<% for (let key in tags) { %>
+								<option value="<%= tags[key].tagId %>" <% if (project.tagId == tags[key].tagId) { %>selected<% } %>><%= tags[key].displayName %></option>
+							<% } %>
+						</select>
+					</div>
+				</div>
+
+				<input type="hidden" id="videoId" name="videoId" value="<%= project.videoId %>">
+				<input type="hidden" id="projectId" name="projectId" value="<%= project.projectId %>">
 
 				<div class="row">
-					<div class="col-sm mb-3">					
-						<button class="btn btn-primary" type="submit">追加</button>
+					<div class="col col-auto mb-3">		
+						<% if (project.projectId != undefined) { %>
+							<button class="btn btn-primary" type="submit">更新</button>
+						<% } else { %>
+							<button class="btn btn-primary" type="submit">追加</button>
+						<% } %>
 					</div>
-					<div class="col-sm mb-3">					
+					<div class="col col-auto mb-3">					
 						<button class="btn btn-danger" type="button" onclick='location.href="/admin";'>戻る</button>
 					</div>
 				</div>
@@ -39,6 +70,12 @@
 			let ytPlayer = null ;
 
 			$(function () {
+				let tagId = localStorage.getItem("tagId") ;
+
+				if (tagId != undefined) {
+					$("#tagId").val(tagId) ;
+				}
+
 				var tag = document.createElement('script');
 				tag.src = "https://www.youtube.com/iframe_api";
 				var firstScriptTag = document.getElementsByTagName('script')[0];
