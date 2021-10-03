@@ -103,29 +103,32 @@
 				$("#results").empty() ;
 				$("#pagenation").empty() ;
 				
-				for (let projectId in searchResultsWithProjectId) {
-					let searchResults = searchResultsWithProjectId[projectId] ;
-					let project = projectWithProjectId[projectId] ;
+				if (Object.keys(searchResultsWithProjectId).length == 0) {
+					$("#results").append("<div>見つかりませんでした。</div>") ;
+				} else {
+					for (let projectId in searchResultsWithProjectId) {
+						let searchResults = searchResultsWithProjectId[projectId] ;
+						let project = projectWithProjectId[projectId] ;
 
-					$("#results").append(resultBlock(project, searchResults)) ;
-				}
-
-				let ul = $('<ul class="pagination">') ;
-
-				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(0);">最初</a></li>') ;
-
-				for (let i=0; i<data.pageCount; i++) {
-					if (i == data.page) {
-						ul.append('<li class="page-item active"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
-					} else {
-						ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+						$("#results").append(resultBlock(project, searchResults)) ;
 					}
+
+					let ul = $('<ul class="pagination">') ;
+
+					ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(0);">最初</a></li>') ;
+
+					for (let i=0; i<data.pageCount; i++) {
+						if (i == data.page) {
+							ul.append('<li class="page-item active"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+						} else {
+							ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+						}
+					}
+
+					ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + (data.pageCount - 1) + ');">最後</a></li>') ;
+
+					$("#pagenation").append('<nav aria-label="Page navigation example">').append('<ul class="pagination">').append(ul) ;
 				}
-
-				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + (data.pageCount - 1) + ');">最後</a></li>') ;
-
-				$("#pagenation").append('<nav aria-label="Page navigation example">')
-					.append('<ul class="pagination">').append(ul) ;
 			}
 
 			function resultBlock(project, searchResults) {

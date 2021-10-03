@@ -76,6 +76,7 @@ router.get('/data', wrap(async function(req, res, next) {
 	for (let i = startIndex; i < projects.length; i++) {
 		let project = projects[i] ;
 
+        /*
         let subtitles = await clientData.getSubtitles(project.projectId) ;
 
         if (subtitles.length > 0) {
@@ -83,7 +84,8 @@ router.get('/data', wrap(async function(req, res, next) {
         } else {
             project.hasSubtitles = false ;
         }
-
+        */
+       
 		fillteredProjects.push(project) ;
 
 		count-- ;

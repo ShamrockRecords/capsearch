@@ -155,6 +155,7 @@ class clientData {
 
 	async deleteProject(projectId) {
 		await admin.firestore().collection("projects").doc(projectId).delete() ;
+		await admin.firestore().collection("subtitles").doc(projectId).delete() ;
 	}
 
 	async getProject(projectId) {
