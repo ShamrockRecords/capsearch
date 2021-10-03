@@ -158,7 +158,7 @@
 				block += `<div class="card mb-3">` ;
 				block += `<div class="card-body">
 							<h5 class="card-title">${project.videoTitle}</h5>
-							<a href="${link}" target="_blank" class="card-link">${link}</a>
+							<a href="${link}" target="_blank" class="card-link ps-3">${link}</a>
 						</div>` ;
 
 				if (searchResults.length > 0) {
@@ -170,7 +170,7 @@
 						let timeFormat = toTimeFormat(searchResult.time.start) ;
 
 						block += `<li class="list-group-item">
-							<div class="row">
+							<div class="row ps-3">
 								<div class="col-auto"><a href="${link}?t=${searchResult.time.start}" target="_blank">${timeFormat}</a></div>
 								<div class="col">${searchResult.text}</div>
 							</div>
