@@ -40,8 +40,7 @@
 
 			<div class="row m-3">
 				<div class="col">
-					<div>YouTubeチャンネル</div>
-					<a href="<%= tag.url %>" target="_blank"><%= tag.url %></a>
+					<a href="<%= tag.url %>" target="_blank">YouTubeチャンネル</a>
 				</div>
 			</div>
 
@@ -68,8 +67,11 @@
 						</div>
 					</div>
 					<div class="row mb-3">
-						<div class="col">
+						<div class="col-auto">
 							<button class="btn btn-primary" type="submit" id="searchButton">検索</button>
+						</div>
+						<div class="col">
+							<div><%= projects.length %>本の動画が登録されています。</div>
 						</div>
 					</div>
 				</form>
