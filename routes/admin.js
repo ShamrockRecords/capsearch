@@ -49,6 +49,7 @@ router.get('/', wrap(async function(req, res, next) {
         res.render('require', {userProfile: userProfile});	
     } else {
         res.render('admin', {
+            rootURL: process.env.ROOT_URL,
             userProfile: userProfile,
             tags: tags
         });	
@@ -64,17 +65,26 @@ router.get('/data', wrap(async function(req, res, next) {
 
     let projects = await clientData.getProjects(tagId) ;
 
-    let fillteredprojects = [] ;
+    let fillteredProjects = [] ;
 
-	let pageCount = Math.floor((projects.length != 0 ? projects.length - 1 : 0) / 5) + 1 ;
+    let count = 10 ;
+	let pageCount = Math.floor((projects.length != 0 ? projects.length - 1 : 0) / count) + 1 ;
 	let page = req.query.page != undefined ? req.query.page : 0;
-	let startIndex = page * 5 ;
-	let count = 5 ;
+	let startIndex = page * count ;
+	
 
 	for (let i = startIndex; i < projects.length; i++) {
 		let project = projects[i] ;
 
-		fillteredprojects.push(project) ;
+        let subtitles = await clientData.getSubtitles(project.projectId) ;
+
+        if (subtitles.length > 0) {
+            project.hasSubtitles = true ;
+        } else {
+            project.hasSubtitles = false ;
+        }
+
+		fillteredProjects.push(project) ;
 
 		count-- ;
 
@@ -84,12 +94,21 @@ router.get('/data', wrap(async function(req, res, next) {
 	}
 
     let data = {
-        projects: fillteredprojects,
+        projects: fillteredProjects,
         pageCount: pageCount,
         page: page} ;
 
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(data));
+})) ;
+
+router.get('/tags', wrap(async function(req, res, next) {
+    let currentUser = req.session.user ;
+
+    let tags = await clientData.getOwnedTags(currentUser.uid) ;
+
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({tags: tags}));
 })) ;
 
 router.get('/delete', wrap(async function(req, res, next) {

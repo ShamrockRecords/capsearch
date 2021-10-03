@@ -27,6 +27,9 @@
 			</div>
 
 			<div class="row mb-3">
+				<a id="mainURL" href=""></a>
+			</div>
+			<div class="row mb-3">
 				<div class="col col-auto">
 					<button type="button" class="btn btn-primary" onclick="location.href='/admin/edit';">動画情報を追加</button>					
 				</div>
@@ -45,19 +48,43 @@
 			</div>
 		</div>
 		<script>
-			$(function () {
+			let tagIdMap = {} ;
+
+			$(async function () {
+				
+				let tags = (await fetch("/admin/tags").then(response => response.json()))["tags"] ;
+				
+				for (let key in tags) {
+					tagIdMap[tags[key].tagId] = tags[key] ;
+				}
+
 				let tagId = localStorage.getItem("tagId") ;
 
 				if (tagId != undefined) {
 					$('#tags').val(tagId) ;
 				} else {
 					localStorage.setItem("tagId", $('#tags').val()) ;
+					tagId = $('#tags').val() ;
 				}
 
+				let tag = tagIdMap[tagId] ;
+
+				$("#mainURL").text("<%= rootURL %>" + "/search/" + tag.name) ;
+				$("#mainURL").prop("href", $("#mainURL").text()) ;
+				$("#mainURL").prop("target", "_blank") ;
+				
 				reloadRequest(0) ;
 
 				$('#tags').change(function() {
-					localStorage.setItem("tagId", $('#tags').val()) ;
+					let tagId = $('#tags').val() ;
+
+					localStorage.setItem("tagId", tagId) ;
+
+					let tag = tagIdMap[tagId] ;
+
+					$("#mainURL").text("<%= rootURL %>" + "/search/" + tag.name) ;
+					$("#mainURL").prop("href", $("#mainURL").text()) ;
+					$("#mainURL").prop("target", "_blank") ;
 
 					reloadRequest(0) ;
 				})
@@ -112,13 +139,24 @@
 
 			function projectBlock(project) {
 
+				let hasSubtitlesString = project.hasSubtitles ? "字幕データあり" : "" ;
+
 				return `<div class="card my-3">
 							<div class="card-body">
 								<div class="row">
 									<div class="col">
 										<div class="row">
-											<div class="col-sm mb-3">
-												<a href="/admin/edit?projectId=${project.projectId}">${project.videoTitle}</a>	
+											<div class="col">
+												<div class="row">
+													<div class="col">
+														<a href="/admin/edit?projectId=${project.projectId}">${project.videoTitle}</a>	
+													</div>
+												</div>
+												<div class="row">
+													<div class="col">
+														${hasSubtitlesString}
+													</div>
+												</div>
 											</div>
 											<div class="col-auto">
 												<button type="button" class="btn btn-primary" onclick="location.href='/admin/subtitles?projectId=${project.projectId}';">字幕データ</button>

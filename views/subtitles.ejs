@@ -15,7 +15,7 @@
 			<div class="mb-3"><%= project.videoTitle %></div>
 
 			<form id="form">
-				<input type="hidden" name="programId" value="<%= project.projectId %>">
+				<input type="hidden" name="projectId" value="<%= project.projectId %>">
 				<input type="file" class="form-control" id="file" name="file" accept=".srt" onchange="changeFile(this);" aria-describedby="fileHelp">
 				<label class="form-label small">ファイルサイズは1MB以内の画像を選択してください。</label>
 			</form>
@@ -82,7 +82,16 @@
 		}
 
 		function subtitleBlock(subtitle) {
-
+			return `<div class="card my-3">
+						<div class="card-body">
+							<div class="row">
+								<div class="col">
+									<div>${subtitle.time.start}</div>
+									<div>${subtitle.text}</div>
+								</div>
+							</div>
+						</div>
+					</div>` ;
 		}
 
 		function changeFile(obj) {
@@ -115,6 +124,8 @@
 					$("#spinner").empty() ;
 
 					$("#file").val("") ;
+
+					reloadRequest(0) ;
 				});
 		}
 	</script>

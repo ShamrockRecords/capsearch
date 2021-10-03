@@ -18,11 +18,56 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 
 	let tag = await clientData.getTag(req.params.name) ;
 
+	let projects = await clientData.getProjects(tag.tagId) ;
+
 	if (tag == null) {
 		res.redirect('/search') ;
 	} else {
-    	res.render('main', {tag: tag});
+    	res.render('main', 
+		{
+			tag: tag,
+			projects: projects,
+			pid: req.query.pid,
+			q: req.query.q,
+		});
 	}
+})) ;
+
+
+router.get('/search/:name/data', wrap(async function(req, res, next) {
+	let tag = await clientData.getTag(req.params.name) ;
+	let searchWord = req.query.q ;
+	let projectId = req.query.pid ;
+
+	if (searchWord == "") {
+		res.setHeader('Content-Type', 'application/json');
+		res.end(JSON.stringify(
+			{
+				projectWithProjectId: {},
+				searchResultsWithProjectId: {}
+			}
+		));
+		return ;
+	}
+
+	let projectWithProjectId = await clientData.getProjectWithProjectId(tag.tagId) ;
+		
+	if (projectId != "") {
+		let project = projectWithProjectId[projectId] ;
+
+		projectWithProjectId = {} ;
+		projectWithProjectId[project.projectId] = project ;
+	}
+
+	let searchResultsWithProjectId = await clientData.searchSubtitles(projectWithProjectId, req.query.q) ;
+
+	res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(
+		{
+			projectWithProjectId: projectWithProjectId,
+			searchResultsWithProjectId: searchResultsWithProjectId
+		}
+	));
 })) ;
 
 router.get('/signout', wrap(async function(req, res, next) {

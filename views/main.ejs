@@ -2,28 +2,176 @@
 <html lang="ja">
 	<head>
 		<%- include('parts/head', {title: '字幕データを検索する'}) %>
+		<style>
+			h1 {
+				position: relative;
+				padding: 0.5em;
+				background: #a6d3c8;
+				color: white;
+			}
+
+			h1::before {
+				position: absolute;
+				content: '';
+				top: 100%;
+				left: 0;
+				border: none;
+				border-bottom: solid 15px transparent;
+				border-right: solid 20px rgb(149, 158, 155);
+			}
+		</style>
 	</head>
 	<body>
 		<div class="container p-5">
 
-			<h1>字幕データを検索する</h1>
+			<h1 class="mb-5">字幕データを検索する</h1>
 			
+			<div class="row m-3">
+				<div class="col h2">
+					<%= tag.displayName %>
+				</div>
+			</div>
+
+			<div class="row m-3">
+				<div class="col">
+					<%= tag.description %>
+				</div>
+			</div>
+
+			<div class="row m-3">
+				<form id="search" method="GET">
+					<div class="row mb-3">
+						<div class="col">
+							<select class="form-select" name="pid" id="projectId" aria-label="タグ">
+								<option value="">すべて</option>
+							<% for (let key in projects) { %>
+								<% let project = projects[key] ; %>
+								<% if (project.projectId == pid) { %>
+									<option value="<%= project.projectId %>" selected><%= project.videoTitle %></option>
+								<% } else { %>
+									<option value="<%= project.projectId %>"><%= project.videoTitle %></option>
+								<% } %>
+							<% } %>
+							</select>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<input id="targetWords" name="q" type="text" class="form-control" value="<%= q %>" placeholder="" aria-label="" aria-describedby="searchButton">
+						</div>
+					</div>
+					<div class="row mb-3">
+						<div class="col">
+							<button class="btn btn-primary" type="submit" id="searchButton">検索</button>
+						</div>
+					</div>
+				</form>
+			</div>
+
 			<div class="row mb-3">
 				<div class="col">
-					<%= tag.displayName %>
+					<h2>検索結果</h2>
 				</div>
 			</div>
 
 			<div class="row mb-3">
 				<div class="col">
-					<%= tag.description %>
-				</div>
-			</div>
-			<div class="row mb-3">
-				<div class="col">
-					<h2>動画一覧</h2>
+					<div class="mb-3" id="results"></div>
 				</div>
 			</div>
 		</div>
+
+		<script>
+			$(function () {
+				reloadRequest(0) ;
+			}) ;
+			
+			async function reloadRequest(page) {
+				let targetWords = $("#targetWords").val() ;
+				let projectId = $("#projectId").val() ;
+
+				let spinner = '<div class="d-flex justify-content-center"><div class="spinner-border my-3" role="status"><span class="visually-hidden">Loading...</span></div></div>' ;
+				
+				$("#results").empty() ;
+				$("#results").append(spinner) ;
+				$("#pagenation").empty() ;
+				
+				let data = await fetch("/search/<%= tag.name %>/data?page=" + page + "&q=" + targetWords + "&pid=" + projectId).then(response => response.json()) ;
+				let projectWithProjectId = data.projectWithProjectId ;
+				let searchResultsWithProjectId = data.searchResultsWithProjectId ;
+
+				$("#results").empty() ;
+				$("#pagenation").empty() ;
+				
+				for (let projectId in searchResultsWithProjectId) {
+					let searchResults = searchResultsWithProjectId[projectId] ;
+					let project = projectWithProjectId[projectId] ;
+
+					$("#results").append(resultBlock(project, searchResults)) ;
+				}
+
+				let ul = $('<ul class="pagination">') ;
+
+				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(0);">最初</a></li>') ;
+
+				for (let i=0; i<data.pageCount; i++) {
+					if (i == data.page) {
+						ul.append('<li class="page-item active"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+					} else {
+						ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + i + ');">' + (i + 1) +'</a></li>') ;
+					}
+				}
+
+				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + (data.pageCount - 1) + ');">最後</a></li>') ;
+
+				$("#pagenation").append('<nav aria-label="Page navigation example">')
+					.append('<ul class="pagination">').append(ul) ;
+			}
+
+			function resultBlock(project, searchResults) {
+				let block = "" ;
+
+				let link = "https://youtu.be/" + project.videoId ;
+
+				block += `<div class="card mb-3">` ;
+				block += `<div class="card-body">
+							<h5 class="card-title">${project.videoTitle}</h5>
+							<a href="${link}" target="_blank" class="card-link">${link}</a>
+						</div>` ;
+
+				if (searchResults.length > 0) {
+					block += `<ul class="list-group list-group-flush">` ;
+
+					for (let key in searchResults) {
+						let searchResult = searchResults[key] ;
+
+						let timeFormat = toTimeFormat(searchResult.time.start) ;
+
+						block += `<li class="list-group-item">
+							<div class="row">
+								<div class="col-auto"><a href="${link}?t=${searchResult.time.start}" target="_blank">${timeFormat}</a></div>
+								<div class="col">${searchResult.text}</div>
+							</div>
+							
+							</li>` ;
+					}
+
+					block += `</ul>` ;
+				}
+				
+				block += `</div>` ;
+  
+				return block ;
+			}
+
+			function toTimeFormat(totalSeconds) {
+				let m = Math.floor(totalSeconds/60) ;
+				let h = Math.floor(m/60) ;
+				let s = totalSeconds%60 ;
+
+				return h + ":" + ('00' + m).slice(-2) + ":" + ('00' + s).slice(-2) ;
+			}
+
+		</script>
 	</body>
 </html>
