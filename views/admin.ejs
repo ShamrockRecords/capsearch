@@ -104,8 +104,7 @@
 				
 				$("#projects").empty() ;
 				$("#pagenation").empty() ;
-				
-
+								
 				for (let key in data.projects) {
 					let project = data.projects[key] ;
 
@@ -126,8 +125,7 @@
 
 				ul.append('<li class="page-item"><a class="page-link" onclick="reloadRequest(' + (data.pageCount - 1) + ');">最後</a></li>') ;
 
-				$("#pagenation").append('<nav aria-label="Page navigation example">')
-					.append('<ul class="pagination">').append(ul) ;
+				$("#pagenation").append('<nav aria-label="Page navigation example">').append('<ul class="pagination">').append(ul) ;
 			}
 
 			async function onClickDeleteProjectButton(projectId) {
