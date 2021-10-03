@@ -46,7 +46,7 @@ class clientData {
 		return tags ;
 	}
 
-	async getTag(tagName) {
+	async getTagByName(tagName) {
 		let tag = null ;
 
         {
@@ -59,6 +59,25 @@ class clientData {
         }
 
 		return tag ;
+	}
+
+	async getTagById(tagId) {
+		let tag = null ;
+
+        {
+            let snapshot = await admin.firestore().collection("tags").where('tagId', '==', tagId).get() ;
+		
+			for (let key in snapshot.docs) {
+				tag = snapshot.docs[key].data() ;
+				break ;
+			}
+        }
+
+		return tag ;
+	}
+
+	async setTag(tag) {
+		await admin.firestore().collection("tags").doc(tag.tagId).set(tag) ;
 	}
 
 	async setSubtitles(projectId, data) {

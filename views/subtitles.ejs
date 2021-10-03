@@ -82,16 +82,26 @@
 		}
 
 		function subtitleBlock(subtitle) {
+			let timeFormat = toTimeFormat(subtitle.time.start) ;
+
 			return `<div class="card my-3">
 						<div class="card-body">
 							<div class="row">
 								<div class="col">
-									<div>${subtitle.time.start}</div>
+									<div>${timeFormat}</div>
 									<div>${subtitle.text}</div>
 								</div>
 							</div>
 						</div>
 					</div>` ;
+		}
+
+		function toTimeFormat(totalSeconds) {
+			let m = Math.floor(totalSeconds/60) ;
+			let h = Math.floor(m/60) ;
+			let s = totalSeconds%60 ;
+
+			return h + ":" + ('00' + m).slice(-2) + ":" + ('00' + s).slice(-2) ;
 		}
 
 		function changeFile(obj) {

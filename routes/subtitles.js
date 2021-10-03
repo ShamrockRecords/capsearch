@@ -36,6 +36,9 @@ router.get('/data', wrap(async function(req, res, next) {
 	for (let i = startIndex; i < subtitles.length; i++) {
 		let subtitle = subtitles[i] ;
 
+        subtitle.time.start = Math.floor(subtitle.time.start) ;
+        subtitle.time.end = Math.floor(subtitle.time.end) ;
+        
 		fillteredSubtitles.push(subtitle) ;
 
 		count-- ;

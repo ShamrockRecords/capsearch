@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<%- include('parts/head', {title: '字幕データを検索する'}) %>
+	</head>
+	<body>
+		<div class="container p-2">
+			<%- include('parts/nav') %>
+		</div>
+
+		<div class="container p-5">
+
+			<h1>タグの編集</h1>
+
+			<form method="POST" action="/admin/tags/edit">
+				<div class="row mb-3">
+					<div class="col-sm">
+						<label for="name" class="form-label">表示名</label>
+						<input maxlength="200" required type="text" class="form-control" id="displayName" name="displayName" value="<%= tag.displayName %>">
+					</div>
+				</div>
+				
+				<div class="row mb-3">
+					<div class="col-sm">
+						<label for="name" class="form-label">説明</label>
+						<input maxlength="200" required type="text" class="form-control" id="description" name="description" value="<%= tag.description %>">
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<div class="col-sm">
+						<label for="name" class="form-label">URL</label>
+						<input maxlength="200" required type="text" class="form-control" id="url" name="url" value="<%= tag.url %>">
+					</div>
+				</div>
+				
+				<input type="hidden" name="tagId" value="<%= tag.tagId %>">
+
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary">更新</button>
+				</div>
+			</form>
+
+		</div>
+	</body>
+</html>

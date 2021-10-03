@@ -27,13 +27,24 @@ router.get('/search', wrap(async function(req, res, next) {
 
 router.get('/search/:name', wrap(async function(req, res, next) {
 
-	let tag = await clientData.getTag(req.params.name) ;
+	let tag = await clientData.getTagByName(req.params.name) ;
 
 	let projects = await clientData.getProjects(tag.tagId) ;
 
 	if (tag == null) {
 		res.redirect('/search') ;
 	} else {
+
+		projects.sort(function(a,b){
+			if (a.videoTitle < b.videoTitle) {
+				 return -1;
+			} else if( a.videoTitle > b.videoTitle ) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
     	res.render('main', 
 		{
 			tag: tag,
@@ -46,7 +57,7 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 
 
 router.get('/search/:name/data', wrap(async function(req, res, next) {
-	let tag = await clientData.getTag(req.params.name) ;
+	let tag = await clientData.getTagByName(req.params.name) ;
 	let searchWord = req.query.q ;
 	let projectId = req.query.pid ;
 

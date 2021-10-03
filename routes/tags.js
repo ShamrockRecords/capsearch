@@ -20,4 +20,31 @@ router.get('/', wrap(async function(req, res, next) {
     res.render('tags', {tags: tags});		 
 })) ;
 
+router.get('/edit', wrap(async function(req, res, next) {
+    let result = await firebaseSession.enter(req, res) ;
+
+    if (result != 0) {
+        res.redirect('/signin');
+        return ;
+    }
+
+    let tag = await clientData.getTagById(req.query.tagId) ;
+
+    res.render('tagEdit', {tag: tag});		 
+
+})) ;
+
+router.post('/edit', wrap(async function(req, res, next) {
+
+    let tag = await clientData.getTagById(req.body.tagId) ;
+
+    tag.displayName = req.body.displayName ;
+    tag.description = req.body.description ;
+    tag.url = req.body.url ;
+
+    await clientData.setTag(tag) ;
+
+    res.redirect("/admin/tags") ;
+})) ;
+
 module.exports = router;
