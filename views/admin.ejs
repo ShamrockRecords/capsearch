@@ -52,7 +52,7 @@
 
 			$(async function () {
 				
-				let tags = (await fetch("/admin/tags").then(response => response.json()))["tags"] ;
+				let tags = (await fetch("/admin/tagsData").then(response => response.json()))["tags"] ;
 				
 				for (let key in tags) {
 					tagIdMap[tags[key].tagId] = tags[key] ;

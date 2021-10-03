@@ -102,7 +102,7 @@ router.get('/data', wrap(async function(req, res, next) {
     res.end(JSON.stringify(data));
 })) ;
 
-router.get('/tags', wrap(async function(req, res, next) {
+router.get('/tagsData', wrap(async function(req, res, next) {
     let currentUser = req.session.user ;
 
     let tags = await clientData.getOwnedTags(currentUser.uid) ;
