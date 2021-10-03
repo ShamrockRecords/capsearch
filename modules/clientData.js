@@ -32,6 +32,20 @@ class clientData {
 		return tags ;
 	}
 
+	async getAllTags() {
+		let tags = [] ;
+
+		{
+            let snapshot = await admin.firestore().collection("tags").get() ;
+		
+			for (let key in snapshot.docs) {
+				tags.push(snapshot.docs[key].data()) ;
+			}
+        }
+
+		return tags ;
+	}
+
 	async getTag(tagName) {
 		let tag = null ;
 

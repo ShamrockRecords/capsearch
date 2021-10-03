@@ -7,7 +7,18 @@ var router = express.Router() ;
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
 router.get('/', wrap(async function(req, res, next) {
-	res.render('index', {});		 
+	res.render('index', {rootURL: process.env.ROOT_URL});		 
+})) ;
+
+router.get('/tagData', wrap(async function(req, res, next) {
+	let tags = await clientData.getAllTags() ;
+
+	res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(
+		{
+			tags: tags,
+		}
+	));	 
 })) ;
 
 router.get('/search', wrap(async function(req, res, next) {
