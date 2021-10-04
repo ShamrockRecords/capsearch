@@ -62,9 +62,10 @@ router.post('/upload', upload.single('file'), wrap(async function(req, res, next
     let data = [] ;
 
     try {
-        let contents = fs.readFileSync(req.file.path, 'utf8')
+        let contents = fs.readFileSync(req.file.path, 'utf8') ;
 
-        contents = contents.replace(/,/g, '.')
+        contents = contents.replace(/,/g, '.') ;
+        contents = contents.replace(/\r\n/g, '\n') ;
 
         contents.replace(
             /\d+\n^(\d+:.*)\n((?:(?!\d+:\d+:\d+).*\n*)+)\n$/gm,
