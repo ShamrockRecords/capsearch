@@ -51,6 +51,7 @@ router.get('/edit', wrap(async function(req, res, next) {
 router.post('/edit', wrap(async function(req, res, next) {
 
     if (req.body.tagId == "") {
+        
         let currentUser = req.session.user ;
 
         let tag = {} ;
@@ -61,6 +62,12 @@ router.post('/edit', wrap(async function(req, res, next) {
         tag.url = req.body.url ;
         tag.isPublished = req.body.isPublished == "1" ;
         tag.uids = [currentUser.uid] ;
+        
+        if (await clientData.getTagByName(tag.name) != null) {
+            res.render('tagEdit', {tag: tag});
+            return ;
+        }
+
         tag.tagId = uuid.v4().replace(/-/g, '') ;
 
         await clientData.setTag(tag) ;
