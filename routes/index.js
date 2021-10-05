@@ -46,7 +46,7 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 		});
 
 		var host = req.headers.host ;
-  		var protocol = req.protocol ;
+  		var protocol = "https" ;
 
   		var ogURL = protocol + "://" + host + req.url ;
 		
