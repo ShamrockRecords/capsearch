@@ -60,7 +60,7 @@
 
 				let tagId = localStorage.getItem("tagId") ;
 
-				if (tagId != undefined) {
+				if (tagId != undefined && tagIdMap[tagId] != undefined) {
 					$('#tags').val(tagId) ;
 				} else {
 					localStorage.setItem("tagId", $('#tags').val()) ;
