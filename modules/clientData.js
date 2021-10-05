@@ -21,13 +21,15 @@ class clientData {
 	async getOwnedTags(uid) {
 		let tags = [] ;
 
-		{
-            let snapshot = await admin.firestore().collection("tags").where('uid', '==', uid).get() ;
+		try {
+            let snapshot = await admin.firestore().collection("tags").where('uids', 'array-contains', uid).get() ;
 		
 			for (let key in snapshot.docs) {
 				tags.push(snapshot.docs[key].data()) ;
 			}
-        }
+        } catch (e) {
+			console.log(e) ;
+		}
 
 		return tags ;
 	}

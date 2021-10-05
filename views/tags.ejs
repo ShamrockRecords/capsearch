@@ -12,6 +12,13 @@
 
 			<h1>タグ一覧</h1>
 
+			<% if (userProfile.role == 2) { %>
+				<div class="row mb-3">
+					<div class="col col-auto">
+						<button type="button" class="btn btn-primary" onclick="location.href='/admin/tags/edit';">タグを追加</button>					
+					</div>
+				</div>
+			<% } %>
 			<% for (let key in tags) { %>
 				<div class="card my-3">
 					<div class="card-body">
