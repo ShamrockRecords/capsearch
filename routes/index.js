@@ -45,8 +45,14 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 			}
 		});
 
+		var host = req.headers.host ;
+  		var protocol = req.protocol ;
+
+  		var ogURL = protocol + "://" + host + req.url ;
+		
     	res.render('main', 
 		{
+			ogURL: ogURL,
 			tag: tag,
 			projects: projects,
 			pid: req.query.pid,
