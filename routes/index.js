@@ -61,7 +61,6 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 	}
 })) ;
 
-
 router.get('/search/:name/data', wrap(async function(req, res, next) {
 	let tag = await clientData.getTagByName(req.params.name) ;
 	let searchWord = req.query.q ;
@@ -97,6 +96,50 @@ router.get('/search/:name/data', wrap(async function(req, res, next) {
 		}
 	));
 })) ;
+
+/*
+router.get('/download', wrap(async function(req, res, next) {
+	let projectWithProjectId = {} ;
+
+	{
+		let snapshot = await admin.firestore().collection("projects").get() ;
+
+		for (let key in snapshot.docs) {
+			let project = snapshot.docs[key].data() ;
+
+			projectWithProjectId[project.projectId] = project ;
+		}
+	}
+
+	let snapshot = await admin.firestore().collection("subtitles").get() ;
+
+	let contents = [] ;
+
+	contents.push("projectId,tagId,startTime,content") ;
+
+	for (let key in snapshot.docs) {
+		let subtitle = snapshot.docs[key].data() ;
+
+		for (let key in subtitle.data) {
+			let content = subtitle.data[key] ;
+			let project = projectWithProjectId[subtitle.projectId] ;
+
+			contents.push(subtitle.projectId + "," + project.tagId + "," + content.time.start + ",\"" + content.text + "\"") ;
+		}
+	}
+
+	res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+	res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
+
+	let csv = "" ;
+
+	for (let key in contents) {
+		csv += contents[key] + "\r\n" ;
+	}
+	
+    res.end(csv);
+})) ;
+*/
 
 router.get('/signout', wrap(async function(req, res, next) {
 	delete req.session.errorMessage;
