@@ -16,9 +16,16 @@ router.get('/', wrap(async function(req, res, next) {
         return ;
     }
 
-    let project = await clientData.getProject(req.query.projectId) ;
+    let currentUser = req.session.user ;
+    let userProfile = await clientData.getUserProfile(currentUser.uid) ;
 
-    res.render('subtitles', {project: project});		 
+    if (userProfile.role == "0") {
+        res.render('require', {userProfile: userProfile});	
+    } else {
+        let project = await clientData.getProject(req.query.projectId) ;
+
+        res.render('subtitles', {project: project});
+    }		 
 })) ;
 
 router.get('/data', wrap(async function(req, res, next) {

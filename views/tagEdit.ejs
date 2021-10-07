@@ -15,6 +15,17 @@
 			<form method="POST" action="/admin/tags/edit">
 				<div class="row mb-3">
 					<div class="col-sm">
+						<label for="name" class="form-label">名前（URLの末尾を半角英数で入力）</label>
+						<% if (tag.tagId == undefined) { %>
+							<input pattern="^[0-9A-Za-z]+$" maxlength="200" required type="text" class="form-control" id="name" name="name" value="<%= tag.name %>">
+						<% } else  { %>
+							<input maxlength="200" required type="text" class="form-control" id="name" name="name" value="<%= tag.name %>" readonly>
+						<% } %>
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<div class="col-sm">
 						<label for="name" class="form-label">表示名</label>
 						<input maxlength="200" required type="text" class="form-control" id="displayName" name="displayName" value="<%= tag.displayName %>">
 					</div>
@@ -23,17 +34,26 @@
 				<div class="row mb-3">
 					<div class="col-sm">
 						<label for="name" class="form-label">説明</label>
-						<input maxlength="200" required type="text" class="form-control" id="description" name="description" value="<%= tag.description %>">
+						<input maxlength="200” type="text" class="form-control" id="description" name="description" value="<%= tag.description %>">
 					</div>
 				</div>
 
 				<div class="row mb-3">
 					<div class="col-sm">
 						<label for="name" class="form-label">URL</label>
-						<input maxlength="200" required type="text" class="form-control" id="url" name="url" value="<%= tag.url %>">
+						<input maxlength="200" type="text" class="form-control" id="url" name="url" value="<%= tag.url %>">
 					</div>
 				</div>
 				
+				<div class="row mb-3">
+					<div class="col-sm">
+						<div class="form-check">
+							<input class="form-check-input" type="checkbox" value="1" id="isPublished" name="isPublished" <% if (tag.isPublished == true) { %>checked<% } %>>
+							<label class="form-check-label" for="flexCheckDefault">公開</label>
+						</div>
+					</div>
+				</div>
+			
 				<input type="hidden" name="tagId" value="<%= tag.tagId %>">
 
 				<div class="mb-3">

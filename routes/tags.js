@@ -1,6 +1,7 @@
 var express = require('express');
 let clientData = require('../modules/clientData') ;
 let firebaseSession = require('../modules/firebase_session.js') ;
+const uuid = require('node-uuid');
 var router = express.Router() ;
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
@@ -14,10 +15,19 @@ router.get('/', wrap(async function(req, res, next) {
     }
 
     let currentUser = req.session.user ;
+    let userProfile = await clientData.getUserProfile(currentUser.uid) ;
 
-    let tags = await clientData.getOwnedTags(currentUser.uid) ;
-  
-    res.render('tags', {tags: tags});		 
+    if (userProfile.role == "0") {
+        res.render('require', {userProfile: userProfile});	
+    } else {
+        let tags = await clientData.getOwnedTags(currentUser.uid) ;
+    
+        res.render('tags', 
+        {
+            userProfile: userProfile,
+            tags: tags
+        });	
+    }	 
 })) ;
 
 router.get('/edit', wrap(async function(req, res, next) {
@@ -28,7 +38,11 @@ router.get('/edit', wrap(async function(req, res, next) {
         return ;
     }
 
-    let tag = await clientData.getTagById(req.query.tagId) ;
+    let tag = {} ;
+
+    if (req.query.tagId != undefined) {
+        tag = await clientData.getTagById(req.query.tagId) ;
+    }
 
     res.render('tagEdit', {tag: tag});		 
 
@@ -36,13 +50,37 @@ router.get('/edit', wrap(async function(req, res, next) {
 
 router.post('/edit', wrap(async function(req, res, next) {
 
-    let tag = await clientData.getTagById(req.body.tagId) ;
+    if (req.body.tagId == "") {
+        
+        let currentUser = req.session.user ;
 
-    tag.displayName = req.body.displayName ;
-    tag.description = req.body.description ;
-    tag.url = req.body.url ;
+        let tag = {} ;
+        
+        tag.name = req.body.name ;
+        tag.displayName = req.body.displayName ;
+        tag.description = req.body.description ;
+        tag.url = req.body.url ;
+        tag.isPublished = req.body.isPublished == "1" ;
+        tag.uids = [currentUser.uid] ;
+        
+        if (await clientData.getTagByName(tag.name) != null) {
+            res.render('tagEdit', {tag: tag});
+            return ;
+        }
 
-    await clientData.setTag(tag) ;
+        tag.tagId = uuid.v4().replace(/-/g, '') ;
+
+        await clientData.setTag(tag) ;
+    } else {
+        let tag = await clientData.getTagById(req.body.tagId) ;
+
+        tag.displayName = req.body.displayName ;
+        tag.description = req.body.description ;
+        tag.url = req.body.url ;
+        tag.isPublished = req.body.isPublished == "1" ;
+
+        await clientData.setTag(tag) ;
+    }
 
     res.redirect("/admin/tags") ;
 })) ;
