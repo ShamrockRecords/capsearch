@@ -27,6 +27,14 @@
 
 			<div class="row mb-3">
 				<div class="col">
+					<% for (let key in items) { %>
+						<div class="mb-3"><a href="/admin/subtitles/caption?captionId=<%= items[key].id %>"><%= items[key].id %></a></div>
+					<% } %>
+				</div>
+			</div>
+			
+			<div class="row mb-3">
+				<div class="col">
 					<div class="mb-3" id="subtitles"></div>
 				</div>
 			</div>
