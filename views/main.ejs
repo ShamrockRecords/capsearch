@@ -81,6 +81,12 @@
 
 			<div class="row mb-3">
 				<div class="col">
+					<div class="mb-3" id="resultCount"></div>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col">
 					<div class="mb-3" id="results"></div>
 				</div>
 			</div>
@@ -123,12 +129,18 @@
 				if (Object.keys(searchResultsWithProjectId).length == 0) {
 					$("#results").append("<div>見つかりませんでした。</div>") ;
 				} else {
+					let totalCount = 0 ;
+
 					for (let projectId in searchResultsWithProjectId) {
 						let searchResults = searchResultsWithProjectId[projectId] ;
 						let project = projectWithProjectId[projectId] ;
 
 						$("#results").append(resultBlock(project, searchResults)) ;
+
+						totalCount += Object.keys(searchResults).length ;
 					}
+
+					$('#resultCount').text(Object.keys(searchResultsWithProjectId).length + "本の動画の中から" + totalCount + '個所が見つかりました。') ;
 
 					let ul = $('<ul class="pagination">') ;
 
