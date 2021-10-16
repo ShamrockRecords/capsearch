@@ -54,6 +54,7 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 		{
 			ogURL: ogURL,
 			tag: tag,
+			rootURL: process.env.ROOT_URL,
 			projects: projects,
 			pid: req.query.pid,
 			q: req.query.q,
