@@ -3,6 +3,7 @@ let firebaseSession = require('../modules/firebase_session.js') ;
 let admin = require('firebase-admin');
 let clientData = require('../modules/clientData.js');
 var router = express.Router() ;
+let fetch = require("node-fetch") ;
 const uuid = require('node-uuid');
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
@@ -48,12 +49,58 @@ router.get('/', wrap(async function(req, res, next) {
     if (userProfile.role == "0") {
         res.render('require', {userProfile: userProfile});	
     } else {
+        let googleAuthURL = "https://accounts.google.com/o/oauth2/auth?";
+        
+        googleAuthURL += "client_id=" + process.env.GOOGLE_CLIENT_ID ;
+        googleAuthURL += "&redirect_uri=" + encodeURIComponent(process.env.ROOT_URL + "/admin/oauth2callback") ;
+        googleAuthURL += "&scope=https://www.googleapis.com/auth/youtube&response_type=code&access_type=offline" ;
+
         res.render('admin', {
             rootURL: process.env.ROOT_URL,
+            googleAuthURL: googleAuthURL,
             userProfile: userProfile,
             tags: tags
         });	
     }	      
+})) ;
+
+router.get('/oauth2callback', wrap(async function(req, res, next) {
+    let URL = "https://accounts.google.com/o/oauth2/token" ;
+
+    let body = {} ;
+
+    body["code"] = req.query.code ;
+    body["client_id"] = process.env.GOOGLE_CLIENT_ID ;
+    body["client_secret"] = process.env.GOOGLE_CLIENT_SECRET  ;
+    body["redirect_uri"] = process.env.ROOT_URL + "/admin/oauth2callback" ;
+    body["grant_type"] = "authorization_code" ;
+
+    let data = {} ;
+
+    let param = {
+        method: "POST",
+        "Content-Type": "application/json",
+        body: JSON.stringify(body),
+    } ;
+
+    try {
+        data = await fetch(URL, param)
+        .then(response => response.json()) ;
+
+        let currentUser = req.session.user ;
+
+        let userProfile = await clientData.getUserProfile(currentUser.uid) ;
+
+        userProfile.accessToken = data.access_token ;
+        userProfile.refreshToken = data.refresh_token ;
+
+        await clientData.setUserProfile(currentUser.uid, userProfile) ;
+
+    } catch (e) {
+        console.log(e) ;
+    }
+
+    res.redirect("/admin") ;
 })) ;
 
 router.get('/data', wrap(async function(req, res, next) {

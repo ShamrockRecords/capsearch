@@ -50,12 +50,25 @@ router.get('/', wrap(async function(req, res, next) {
 router.get('/caption', wrap(async function(req, res, next) {
     let ytDataAPIURL = "https://www.googleapis.com/youtube/v3/captions/" + req.query.captionId ;
 
+    ytDataAPIURL += "?key=" + process.env.YOUTUBE_API_KEY ;
     ytDataAPIURL += "&tfmt=srt" ;
+
+    let currentUser = req.session.user ;
+
+    let userProfile = await clientData.getUserProfile(currentUser.uid) ;
+
+    let param = {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + userProfile.accessToken,
+            "Accept": "application/json",
+        },
+    } ;
 
     let data = {} ;
 
     try {
-        data = await fetch(ytDataAPIURL)
+        data = await fetch(ytDataAPIURL, param)
         .then(response => response.json()) ;
     } catch (e) {
         console.log(e) ;
