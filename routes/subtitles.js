@@ -3,7 +3,8 @@ let clientData = require('../modules/clientData') ;
 let firebaseSession = require('../modules/firebase_session.js') ;
 const multer = require('multer') ;
 const upload = multer({ dest: 'uploads/' }) ;
-const fs = require('fs')
+const fs = require('fs');
+let fetch = require("node-fetch") ;
 var router = express.Router() ;
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
@@ -24,8 +25,59 @@ router.get('/', wrap(async function(req, res, next) {
     } else {
         let project = await clientData.getProject(req.query.projectId) ;
 
-        res.render('subtitles', {project: project});
+        let ytDataAPIURL = "https://www.googleapis.com/youtube/v3/captions?" ;
+
+        ytDataAPIURL += "key=" + process.env.YOUTUBE_API_KEY ;
+        ytDataAPIURL += "&part=id" ;
+        ytDataAPIURL += "&videoId=" + project.videoId ;
+        
+        let data = {} ;
+
+        try {
+            data = await fetch(ytDataAPIURL)
+            .then(response => response.json()) ;
+        } catch (e) {
+            console.log(e) ;
+        }
+
+        res.render('subtitles', {
+            project: project,
+            items: data.items,
+        });
     }		 
+})) ;
+
+router.get('/caption', wrap(async function(req, res, next) {
+    let ytDataAPIURL = "https://www.googleapis.com/youtube/v3/captions/" + req.query.captionId ;
+
+    ytDataAPIURL += "?key=" + process.env.YOUTUBE_API_KEY ;
+    ytDataAPIURL += "&tfmt=srt" ;
+
+    let currentUser = req.session.user ;
+
+    let userProfile = await clientData.getUserProfile(currentUser.uid) ;
+
+    let param = {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + userProfile.accessToken,
+            "Accept": "application/json",
+        },
+    } ;
+
+    let data = {} ;
+
+    try {
+        data = await fetch(ytDataAPIURL, param)
+        .then(response => response.json()) ;
+    } catch (e) {
+        console.log(e) ;
+    }
+
+    res.setHeader('Content-disposition', 'attachment; filename=' + req.query.captionId + '.srt');
+    res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
+
+    res.send(data);
 })) ;
 
 router.get('/data', wrap(async function(req, res, next) {
