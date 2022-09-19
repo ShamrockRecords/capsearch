@@ -63,6 +63,15 @@ router.get('/search/:name', wrap(async function(req, res, next) {
 })) ;
 
 router.get('/search/:name/data', wrap(async function(req, res, next) {
+	let apiKey = req.query.apiKey ;
+	let referer = req.headers.referer != undefined ? req.headers.referer : "" ;
+
+	if (!referer.startsWith(process.env.ROOT_URL) && apiKey != process.env.API_KEY) {
+		res.setHeader('Content-Type', 'application/json');
+		res.end(JSON.stringify({}));
+		return ;
+	}
+
 	let tag = await clientData.getTagByName(req.params.name) ;
 	let searchWord = req.query.q ;
 	let projectId = req.query.pid ;
@@ -94,6 +103,73 @@ router.get('/search/:name/data', wrap(async function(req, res, next) {
 		{
 			projectWithProjectId: projectWithProjectId,
 			searchResultsWithProjectId: searchResultsWithProjectId
+		}
+	));
+})) ;
+
+router.get('/search/:name/pids', wrap(async function(req, res, next) {
+	let apiKey = req.query.apiKey ;
+	let referer = req.headers.referer != undefined ? req.headers.referer : "" ;
+
+	if (!referer.startsWith(process.env.ROOT_URL) && apiKey != process.env.API_KEY) {
+		res.setHeader('Content-Type', 'application/json');
+		res.end(JSON.stringify({}));
+		return ;
+	}
+
+	let tag = await clientData.getTagByName(req.params.name) ;
+
+	let projectWithProjectId = await clientData.getProjectWithProjectId(tag.tagId) ;
+		
+	let projects = [] ;
+
+	for (let key in projectWithProjectId) {
+		let project = projectWithProjectId[key] ;
+
+		projects.push({
+			"pid": project.projectId, 
+			"videoTitle": project.videoTitle, 
+			"videoURL": project.videoURL,
+			"videoId": project.videoId}) ;
+	}
+
+	res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(
+		{
+			projects: projects,
+		}
+	));
+})) ;
+
+router.get('/search/:name/subtitles', wrap(async function(req, res, next) {
+	let apiKey = req.query.apiKey ;
+	let referer = req.headers.referer != undefined ? req.headers.referer : "" ;
+
+	if (!referer.startsWith(process.env.ROOT_URL) && apiKey != process.env.API_KEY) {
+		res.setHeader('Content-Type', 'application/json');
+		res.end(JSON.stringify({}));
+		return ;
+	}
+
+	let projectId = req.query.pid ;
+
+	if (projectId == undefined || projectId == "") {
+		res.setHeader('Content-Type', 'application/json');
+		res.end(JSON.stringify(
+			{
+				subtitles: [],
+			}
+		));
+
+		return ;
+	}
+
+	let subtitles = await clientData.getSubtitles(projectId) ;
+
+	res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(
+		{
+			subtitles: subtitles,
 		}
 	));
 })) ;
