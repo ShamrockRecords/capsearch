@@ -38,6 +38,10 @@ FIREBASE_ADMINSDK_auth_uri = ""
 FIREBASE_ADMINSDK_token_uri = ""
 FIREBASE_ADMINSDK_auth_provider_x509_cert_url = ""
 FIREBASE_ADMINSDK_client_x509_cert_url = ""
+
+OPENED_FIREBASE_API_KEY = ""
+API_KEY = ""
+OPEN_AI_KEY = ""
 ```
 ### firestoreへのアクセス
 
@@ -88,7 +92,20 @@ FIREBASE_ADMINSDK_auth_uri = ""
 FIREBASE_ADMINSDK_token_uri = ""
 FIREBASE_ADMINSDK_auth_provider_x509_cert_url = ""
 FIREBASE_ADMINSDK_client_x509_cert_url = ""
+
 ```
+
+### その他
+
+```
+OPENED_FIREBASE_API_KEY = ""
+API_KEY = ""
+OPEN_AI_KEY = ""
+```
+
+サインイン画面で使用するフロントエンドに公開されてしまうAPIキーです。きちんとドメインでセキュリティ設定をしてください。
+API_KEYは外部からcurlでアクセするためのキーでなので必要であれば設定してください。
+OPEN_AI_KEYはOpenAIのAPIを使用するためのキーです。
 
 ### 動作させるドメイン
 
