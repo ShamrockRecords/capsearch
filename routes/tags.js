@@ -103,7 +103,7 @@ router.get('/projectIds', wrap(async function(req, res, next) {
         for (let key in projects) {
             let project = projects[key] ;
 
-            projectIds.push(project.projectId) ;
+            projectIds.push(project.projectId + "\t" + project.videoTitle) ;
         }
     }
     

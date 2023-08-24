@@ -220,49 +220,69 @@ async function makeData(projectId) {
         array.push(subtitle.text) ;
     }
 
-    let authorization = process.env.OPEN_AI_KEY ;
+    console.log(array.join("\r\n").length) ;
 
-    let messages = [
-        {"role": "user", "content": '以下の内容からいい感じの質疑応答を作成してください。[{question : "質問", answer : "回答"}, ...] のようなJSON形式でお願いします。'},
-        {"role": "user", "content": "---"},
-        {"role": "user", "content": array.join("\r\n")},
-    ] ;
-
-    let body = {
-        "model": "gpt-3.5-turbo-16k",
-        "messages": messages,
-        "temperature": 0.0
-    } ;
-
-    const param = {
-        method: "POST",
-        headers: {"Authorization": "Bearer " + authorization, "Content-Type": "application/json"},
-        body: JSON.stringify(body)
-    }
-     
-    let data = await fetch("https://api.openai.com/v1/chat/completions", param).then(response => response.json()) ;
-    
-    let content = "" ;
+    let blocks = [] ;
+    let totalLength = 0 ;
+    let csvLines = [] ;
     let error = "" ;
 
-    try {
-        if (data.error != undefined) {
-            error = data.error.message ;
-        } else if (data.choices[0].message != undefined) {
-            let lines = JSON.parse(data.choices[0].message.content) ;
-            let csvLines = [] ;
+    for (let key in array) {
+        let text = array[key] ;
 
-            for (let key in lines) {
-                let element = lines[key] ;
+        totalLength += text.length ;
 
-                csvLines.push(element.question + "\t" + element.answer) ;
-            }
+        blocks.push(text) ;
 
-            content = csvLines.join("\n") ;
+        if (totalLength < 3000 && key != array.length - 1) {
+            continue ;
         }
-    } catch (e) {
-        error = e.message ;
+
+        let authorization = process.env.OPEN_AI_KEY ;
+
+        let messages = [
+            {"role": "user", "content": '以下の文章からいい感じの質疑応答を作成してください。結果は"[{"question" : "質問", "answer" : "回答"}, ...]"のようなJSON形式でお願いします。'},
+            {"role": "user", "content": "---"},
+            {"role": "user", "content": blocks.join("\r\n")},
+        ] ;
+
+        let body = {
+            "model": "gpt-3.5-turbo-16k",
+            "messages": messages,
+            "temperature": 0.0
+        } ;
+
+        const param = {
+            method: "POST",
+            headers: {"Authorization": "Bearer " + authorization, "Content-Type": "application/json"},
+            body: JSON.stringify(body)
+        }
+        
+        let data = await fetch("https://api.openai.com/v1/chat/completions", param).then(response => response.json()) ;
+
+        try {
+            if (data.error != undefined) {
+                error = data.error.message ;
+                break ;
+            } else if (data.choices[0].message != undefined) {
+                let lines = JSON.parse(data.choices[0].message.content) ;
+                
+                for (let key in lines) {
+                    let element = lines[key] ;
+
+                    csvLines.push(element.question + "\t" + element.answer) ;
+                }
+            }
+        } catch (e) {
+            error = e.message ;
+            break ;
+        }
+
+        blocks = [] ;
+        totalLength = 0 ;
     }
+    
+    let content = csvLines.join("\n") ;
 
     return {"content": content, "error" : error} ;
 }
