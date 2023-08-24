@@ -85,4 +85,31 @@ router.post('/edit', wrap(async function(req, res, next) {
     res.redirect("/admin/tags") ;
 })) ;
 
+router.get('/projectIds', wrap(async function(req, res, next) {
+    let result = await firebaseSession.enter(req, res) ;
+
+    if (result != 0) {
+        res.redirect('/signin');
+        return ;
+    }
+
+    let projectIds = [] ;
+
+    let tagId = req.query.tagId ;
+
+    if (tagId != undefined) {
+        let projects = await clientData.getProjects(tagId) ;
+
+        for (let key in projects) {
+            let project = projects[key] ;
+
+            projectIds.push(project.projectId) ;
+        }
+    }
+    
+    res.setHeader('Content-disposition', `attachment; filename=projectIds.txt`);
+    res.setHeader('Content-Type', 'text/plain; charset=UTF8');
+    res.send(projectIds.join("\r\n")) ;
+})) ;
+
 module.exports = router;

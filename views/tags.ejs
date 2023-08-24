@@ -34,9 +34,14 @@
 										<%= tags[key].name %>
 									</div>
 								</div>
-								<div class="row">
+								<div class="row mb-3">
 									<div class="col-sm">
 										<%= tags[key].description %>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col col-auto ">
+										<button type="button" class="btn btn-primary small" onclick="location.href='/admin/tags/projectIds?tagId=<%= tags[key].tagId %>';">プロジェクトIDを取得</button>					
 									</div>
 								</div>
 							</div>

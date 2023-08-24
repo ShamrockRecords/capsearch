@@ -185,11 +185,15 @@ router.get('/signout', wrap(async function(req, res, next) {
 })) ;
 
 router.get('/data4gpt', wrap(async function(req, res, next) {
-	let result = await firebaseSession.enter(req, res) ;
+    let apiKey = req.query.apiKey ;
 
-    if (result != 0) {
-        res.redirect('/signin');
-        return ;
+    if (apiKey != process.env.API_KEY) {
+        let result = await firebaseSession.enter(req, res) ;
+
+        if (result != 0) {
+            res.redirect('/signin');
+            return ;
+        }
     }
 
     let projectId = req.query.projectId ;
