@@ -4,6 +4,7 @@ let admin = require('firebase-admin');
 let clientData = require('../modules/clientData.js');
 var router = express.Router() ;
 const uuid = require('node-uuid');
+var fetch = require('node-fetch') ;
 
 const wrap = fn => (...args) => fn(...args).catch(args[2]) ;
 
@@ -212,6 +213,7 @@ router.get('/data4gpt', wrap(async function(req, res, next) {
 })) ;
 
 async function makeData(projectId) {
+    let project = await clientData.getProject(projectId) ;
     let subtitles = await clientData.getSubtitles(projectId) ;
     let array = [] ;
     
@@ -234,14 +236,14 @@ async function makeData(projectId) {
 
         blocks.push(text) ;
 
-        if (totalLength < 3000 && key != array.length - 1) {
+        if (totalLength < 5000 && key != array.length - 1) {
             continue ;
         }
 
         let authorization = process.env.OPEN_AI_KEY ;
 
         let messages = [
-            {"role": "user", "content": '以下の文章からいい感じの質疑応答を作成してください。結果は"[{"question" : "質問", "answer" : "回答"}, ...]"のようなJSON形式でお願いします。'},
+            {"role": "user", "content": `動画のタイトルが「${project.videoTitle}」についての以下の内容から質疑応答を作成してください。質問文は主語や目的語などを省略せず質問と回答だけで完結するように作成してください。結果は"[{"question" : "質問", "answer" : "回答"}, ...]"のようなJSON形式でお願いします。`},
             {"role": "user", "content": "---"},
             {"role": "user", "content": blocks.join("\r\n")},
         ] ;
@@ -270,7 +272,7 @@ async function makeData(projectId) {
                 for (let key in lines) {
                     let element = lines[key] ;
 
-                    csvLines.push(element.question + "\t" + element.answer) ;
+                    csvLines.push(`${projectId}\t${project.videoTitle}\t${element.question}\t${element.answer}`) ;
                 }
             }
         } catch (e) {
