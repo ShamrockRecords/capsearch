@@ -243,7 +243,7 @@ async function makeData(projectId) {
         let authorization = process.env.OPEN_AI_KEY ;
 
         let messages = [
-            {"role": "user", "content": `動画のタイトルが「${project.videoTitle}」についての以下の内容から質疑応答を作成してください。質問文は主語や目的語などを省略せず質問と回答だけで完結するように作成してください。結果は"[{"question" : "質問", "answer" : "回答"}, ...]"のようなJSON形式でお願いします。`},
+            {"role": "user", "content": `動画のタイトルが「${project.videoTitle}」についての以下の内容から質疑応答を10個以上作成してください。質問文は主語や目的語などを省略せず質問と回答だけで完結するように作成してください。結果は"[{"question" : "質問", "answer" : "回答"}, ...]"のようなJSON形式でお願いします。`},
             {"role": "user", "content": "---"},
             {"role": "user", "content": blocks.join("\r\n")},
         ] ;
